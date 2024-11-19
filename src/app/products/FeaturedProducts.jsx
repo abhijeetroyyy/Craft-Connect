@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
+import Image from "next/image"; // Import Next.js Image component
 
 const FeaturedProducts = () => {
   const [products, setProducts] = useState([]);
@@ -104,10 +105,14 @@ const ProductCard = ({ product }) => {
   return (
     <div className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 mx-4 flex flex-col justify-between w-[280px] h-[500px] md:w-[300px] lg:w-[320px] overflow-hidden dark:bg-gray-800 dark:text-white">
       <div className="relative flex flex-col justify-between flex-grow">
-        <img
+        {/* Replace <img> with <Image> */}
+        <Image
           src={product.image}
           alt={product.title}
+          width={400} // Set a specific width for the image
+          height={300} // Set a specific height for the image
           className="w-full h-48 object-cover rounded-md mb-4 transition-transform duration-300 transform hover:scale-110"
+          priority // Optional: Use if you want to preload the image for better performance
         />
         <span className="absolute top-2 right-2 bg-yellow-500 text-white text-xs font-semibold px-3 py-1 rounded-md shadow-md">
           ${product.price}

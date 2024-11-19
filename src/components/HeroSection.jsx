@@ -18,7 +18,7 @@ export default function HeroSection() {
       setBgImageIndex((prevIndex) => (prevIndex + 1) % bgImages.length);
     }, 5000); // 5000ms = 5 seconds
     return () => clearInterval(interval); // Cleanup on unmount
-  }, []);
+  }, [bgImageIndex]); // Use bgImageIndex as a dependency to keep it consistent
 
   return (
     <section className="relative py-32 bg-gray-800 text-white">

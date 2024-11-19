@@ -31,10 +31,10 @@ export default function ArtisanHighlight() {
               Jane has been crafting beautiful pottery for over 15 years. Her passion for shaping clay into functional and decorative pieces shines through in every product she creates. She takes pride in using sustainable methods and supporting the local community.
             </p>
             <button
-              aria-label="Explore Jane's Creations"
+              aria-label="Explore Jane&apos;s Creations" // Use &apos; to escape the apostrophe
               className="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-6 rounded-lg transition-all duration-300 transform hover:scale-105"
             >
-              Explore Jane's Creations
+              Explore Jane&apos;s Creations
             </button>
           </div>
         </div>

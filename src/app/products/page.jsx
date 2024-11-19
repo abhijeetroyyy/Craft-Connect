@@ -8,8 +8,8 @@ const page = () => {
   return (
     <>
     <Navbar/>
-    <ProductCard/>
-    <ProductsList/>
+    {/* <ProductCard/> */}
+    {/* <ProductsList/> */}
     <Footer/>
     </>
   )

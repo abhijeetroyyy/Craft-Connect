@@ -19,6 +19,9 @@ const NavLink = React.memo(({ href, children, active, onClick }) => (
   </Link>
 ));
 
+// Add displayName to the memoized component
+NavLink.displayName = "NavLink";
+
 export default function Navbar() {
   const [menuState, setMenuState] = useState({ isMobileMenuOpen: false, isModalOpen: false });
   const pathname = usePathname(); // To track current route
