@@ -1,13 +1,22 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function ThemeToggle() {
-  // Check system theme preference
-  const isSystemDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  // Track if the component is mounted to avoid SSR issues
+  const [isMounted, setIsMounted] = useState(false);
 
-  // Initial theme based on system preference
-  const [isDarkMode, setIsDarkMode] = useState(isSystemDarkMode);
+  // Check system theme preference after the component is mounted (client-side only)
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    // Set the initial theme based on system preference (only on the client side)
+    const isSystemDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    setIsDarkMode(isSystemDarkMode);
+
+    // Set that the component is mounted
+    setIsMounted(true);
+  }, []);
 
   // Handle theme toggle
   const handleThemeToggle = () => {
@@ -21,6 +30,11 @@ export default function ThemeToggle() {
       document.documentElement.classList.remove("dark");
     }
   };
+
+  // Render nothing until the component is mounted to avoid SSR mismatch
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <button
