@@ -7,9 +7,9 @@ export default function Footer() {
     <footer className="bg-white dark:bg-[#212121] text-gray-700 dark:text-gray-100 py-8 mt-auto">
       <div className="container mx-auto px-4">
         {/* Top Section */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-8 justify-items-center md:justify-items-start">
           {/* Column 1: About */}
-          <div>
+          <div className="text-center md:text-left">
             <h3 className="text-lg font-semibold mb-4">About Us</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Artisan Marketplace connects skilled artisans with customers seeking unique, handcrafted products. Explore creativity and craftsmanship in one place.
@@ -17,7 +17,7 @@ export default function Footer() {
           </div>
 
           {/* Column 2: Quick Links */}
-          <div>
+          <div className="text-center md:text-left">
             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li>
@@ -60,9 +60,9 @@ export default function Footer() {
           </div>
 
           {/* Column 3: Social Media */}
-          <div>
+          <div className="text-center md:text-left">
             <h3 className="text-lg font-semibold mb-4">Follow Us</h3>
-            <div className="flex space-x-4">
+            <div className="flex justify-center md:justify-start space-x-4">
               <a
                 href="https://www.facebook.com"
                 target="_blank"
