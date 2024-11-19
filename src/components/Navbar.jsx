@@ -12,21 +12,19 @@ const NavLink = React.memo(({ href, children, active, onClick }) => (
     <span
       className={`${
         active ? "text-blue-600 dark:text-blue-400" : "text-gray-700 dark:text-white"
-      } hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300 font-medium`}
+      } hover:text-blue-700 dark:hover:text-blue-500 transition-colors duration-300 font-medium py-2 px-4 rounded-md block`}
     >
       {children}
     </span>
   </Link>
 ));
 
-// Add displayName to the memoized component
 NavLink.displayName = "NavLink";
 
 export default function Navbar() {
   const [menuState, setMenuState] = useState({ isMobileMenuOpen: false, isModalOpen: false });
   const pathname = usePathname(); // To track current route
 
-  // Memoize the NavLink components to avoid unnecessary re-renders
   const navLinks = useMemo(() => [
     { href: '/', label: 'Home' },
     { href: '/products', label: 'Products' },
@@ -34,7 +32,6 @@ export default function Navbar() {
     { href: '/cart', label: 'Cart' }
   ], []);
 
-  // Handle mobile menu toggle
   const handleMenuToggle = useCallback(() => {
     setMenuState((prevState) => ({
       ...prevState,
@@ -42,7 +39,6 @@ export default function Navbar() {
     }));
   }, []);
 
-  // Handle modal toggle
   const handleModalToggle = useCallback(() => {
     setMenuState((prevState) => ({
       ...prevState,
@@ -52,7 +48,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="bg-white dark:bg-[#212121] shadow-md sticky top-0 z-50 transition-all">
+      <nav className="bg-white dark:bg-[#212121] shadow-md sticky top-0 z-50 transition-all ease-in-out duration-300">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
           {/* Logo */}
           <div className="text-xl font-bold text-black dark:text-white">
@@ -70,7 +66,18 @@ export default function Navbar() {
                 {label}
               </NavLink>
             ))}
-            <Button variant="outline" size="sm" onClick={handleModalToggle}>Login</Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="hover:bg-blue-600 hover:text-white transition-all duration-300 rounded-md"
+              onClick={handleModalToggle}
+            >
+              Login
+            </Button>
+          </div>
+
+          {/* Theme Toggle for Mobile */}
+          <div>
             <ThemeToggle />
           </div>
 
@@ -101,8 +108,8 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {menuState.isMobileMenuOpen && (
-        <div className="md:hidden bg-white dark:bg-[#212121] border-t border-gray-200 dark:border-gray-700 transition-all duration-300">
-          <div className="flex flex-col space-y-6 py-6 px-6">
+        <div className="md:hidden bg-white dark:bg-[#212121] bg-opacity-95 fixed inset-0 z-40 flex justify-center items-center transition-all ease-in-out duration-300">
+          <div className="flex flex-col space-y-6 py-6 px-6 bg-white dark:bg-[#212121] shadow-lg rounded-lg w-4/5 max-w-md">
             {navLinks.map(({ href, label }) => (
               <NavLink
                 key={href}
@@ -113,10 +120,14 @@ export default function Navbar() {
                 {label}
               </NavLink>
             ))}
-            <Button variant="outline" size="sm" onClick={handleModalToggle}>Login</Button>
-            <div className="mt-4">
-              <ThemeToggle />
-            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="hover:bg-blue-600 hover:text-white transition-all duration-300 rounded-md"
+              onClick={handleModalToggle}
+            >
+              Login
+            </Button>
           </div>
         </div>
       )}
