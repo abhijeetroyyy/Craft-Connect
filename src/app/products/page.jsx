@@ -1,15 +1,13 @@
 import Navbar from '@/components/Navbar'
 import React from 'react'
-import ProductCard from './ProductCard'
-import ProductsList from './ProductsList'
 import Footer from '@/components/Footer'
+import ProductGrid from './Product Grid'
 
 const page = () => {
   return (
     <>
     <Navbar/>
-    {/* <ProductCard/> */}
-    {/* <ProductsList/> */}
+    <ProductGrid/>
     <Footer/>
     </>
   )
