@@ -2,6 +2,7 @@
 
 import { useTheme } from 'next-themes'; // For theme management in Next.js
 import { useEffect, useState } from 'react'; // For managing background images in a slideshow
+import Link from 'next/link'; // Import Link for routing
 
 export default function HeroSection() {
   const { theme, setTheme } = useTheme(); // Hook to get the current theme
@@ -17,8 +18,9 @@ export default function HeroSection() {
     const interval = setInterval(() => {
       setBgImageIndex((prevIndex) => (prevIndex + 1) % bgImages.length);
     }, 5000); // 5000ms = 5 seconds
+
     return () => clearInterval(interval); // Cleanup on unmount
-  }, [bgImageIndex]); // Use bgImageIndex as a dependency to keep it consistent
+  }, []); // Empty dependency array ensures it only runs once
 
   return (
     <section className="relative py-32 bg-gray-800 text-white">
@@ -31,9 +33,9 @@ export default function HeroSection() {
         <p className="text-lg mb-6 text-gray-300 drop-shadow-lg">
           Artisan Marketplace connects skilled artisans with customers seeking unique, handcrafted products.
         </p>
-        <button className="bg-yellow-500 hover:bg-yellow-600 text-white py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
+        <Link href="/products" className="bg-yellow-500 hover:bg-yellow-600 text-white py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
           Browse Crafts
-        </button>
+        </Link>
       </div>
 
       {/* Background Image with theme-based opacity and slideshow */}
