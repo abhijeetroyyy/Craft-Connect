@@ -39,7 +39,8 @@
     "react-toastify": "^10.0.6",
     "swiper": "^11.1.15",
     "tailwind-merge": "^2.5.4",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "zxcvbn": "^4.4.2"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.20",
