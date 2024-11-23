@@ -1,10 +1,12 @@
 'use client';
-import React, { useState, useCallback, useMemo } from "react";  // Correct import
+import React, { useState, useCallback, useMemo, useEffect } from "react";  // Correct import
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/ThemeToggle";
 import { usePathname } from 'next/navigation';
 import Modal from "./Modal";
+import { auth } from "./firebase-config";  // Import Firebase config
+import { onAuthStateChanged, signOut } from "firebase/auth";
 
 // NavLink Component (Reusable and Memoized)
 const NavLink = React.memo(({ href, children, active, onClick }) => (
@@ -23,6 +25,7 @@ NavLink.displayName = "NavLink";
 
 export default function Navbar() {
   const [menuState, setMenuState] = useState({ isMobileMenuOpen: false, isModalOpen: false });
+  const [user, setUser] = useState(null);  // State to hold user information
   const pathname = usePathname(); // To track current route
 
   const navLinks = useMemo(() => [
@@ -46,6 +49,25 @@ export default function Navbar() {
     }));
   }, []);
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      alert("Logged out successfully!");
+      setUser(null);  // Clear user state on logout
+    } catch (error) {
+      alert("Error logging out: " + error.message);
+    }
+  };
+
+  // Monitor authentication state
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);  // Set the user if logged in
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   return (
     <>
       <nav className="bg-white dark:bg-[#212121] shadow-md sticky top-0 z-50 transition-all ease-in-out duration-300">
@@ -66,14 +88,25 @@ export default function Navbar() {
                 {label}
               </NavLink>
             ))}
-            <Button
-              variant="outline"
-              size="sm"
-              className="hover:bg-blue-600 hover:text-white transition-all duration-300 rounded-md"
-              onClick={handleModalToggle}
-            >
-              Login
-            </Button>
+            {!user ? (
+              <Button
+                variant="outline"
+                size="sm"
+                className="hover:bg-blue-600 hover:text-white transition-all duration-300 rounded-md"
+                onClick={handleModalToggle}
+              >
+                Login
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                className="hover:bg-blue-600 hover:text-white transition-all duration-300 rounded-md"
+                onClick={handleLogout}
+              >
+                Logout
+              </Button>
+            )}
           </div>
 
           {/* Theme Toggle for Mobile */}
@@ -120,14 +153,25 @@ export default function Navbar() {
                 {label}
               </NavLink>
             ))}
-            <Button
-              variant="outline"
-              size="sm"
-              className="hover:bg-blue-600 hover:text-white transition-all duration-300 rounded-md"
-              onClick={handleModalToggle}
-            >
-              Login
-            </Button>
+            {!user ? (
+              <Button
+                variant="outline"
+                size="sm"
+                className="hover:bg-blue-600 hover:text-white transition-all duration-300 rounded-md"
+                onClick={handleModalToggle}
+              >
+                Login
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                className="hover:bg-blue-600 hover:text-white transition-all duration-300 rounded-md"
+                onClick={handleLogout}
+              >
+                Logout
+              </Button>
+            )}
           </div>
         </div>
       )}
