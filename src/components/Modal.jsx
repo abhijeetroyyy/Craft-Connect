@@ -248,7 +248,7 @@ const Modal = ({ isOpen, onClose }) => {
                 value={formData.name}
                 onChange={handleInputChange}
                 placeholder="Full Name"
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-300 focus:outline-none"
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-300 focus:outline-none dark:bg-[#2A2A2A] dark:text-white dark:placeholder-gray-400"
               />
             </div>
           )}
@@ -262,7 +262,7 @@ const Modal = ({ isOpen, onClose }) => {
                 value={formData.username}
                 onChange={handleInputChange}
                 placeholder="Username"
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-300 focus:outline-none"
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-300 focus:outline-none dark:bg-[#2A2A2A] dark:text-white dark:placeholder-gray-400"
               />
             </div>
           )}
@@ -275,7 +275,7 @@ const Modal = ({ isOpen, onClose }) => {
               value={formData.email}
               onChange={handleInputChange}
               placeholder="Email"
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-300 focus:outline-none"
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-300 focus:outline-none dark:bg-[#2A2A2A] dark:text-white dark:placeholder-gray-400"
             />
           </div>
 
@@ -288,7 +288,7 @@ const Modal = ({ isOpen, onClose }) => {
                 value={formData.phone}
                 onChange={handleInputChange}
                 placeholder="Phone Number"
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-300 focus:outline-none"
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-300 focus:outline-none dark:bg-[#2A2A2A] dark:text-white dark:placeholder-gray-400"
               />
             </div>
           )}
@@ -301,7 +301,7 @@ const Modal = ({ isOpen, onClose }) => {
               value={formData.password}
               onChange={handleInputChange}
               placeholder="Password"
-              className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-300 focus:outline-none"
+              className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-300 focus:outline-none dark:bg-[#2A2A2A] dark:text-white dark:placeholder-gray-400"
             />
             <button
               type="button"
@@ -311,7 +311,7 @@ const Modal = ({ isOpen, onClose }) => {
                   password: !prev.password,
                 }))
               }
-              className="absolute right-3 top-1/3 transform -translate-y-1/2 text-gray-400"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
             >
               {passwordVisibility.password ? <MdVisibilityOff /> : <MdVisibility />}
             </button>
@@ -327,7 +327,7 @@ const Modal = ({ isOpen, onClose }) => {
                 value={formData.confirmPassword}
                 onChange={handleInputChange}
                 placeholder="Confirm Password"
-                className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-300 focus:outline-none"
+                className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-300 focus:outline-none dark:bg-[#2A2A2A] dark:text-white dark:placeholder-gray-400"
               />
               <button
                 type="button"
