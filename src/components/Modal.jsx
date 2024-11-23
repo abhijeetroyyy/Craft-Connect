@@ -24,7 +24,7 @@ const validatePassword = (password) => {
 
 const Modal = ({ isOpen, onClose }) => {
   const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({
+  const initialFormData = {
     email: "",
     password: "",
     confirmPassword: "",
@@ -32,13 +32,22 @@ const Modal = ({ isOpen, onClose }) => {
     username: "",
     phone: "",
     role: "",
-  });
+  };
+  const [formData, setFormData] = useState(initialFormData);
   const [errors, setErrors] = useState({});
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [passwordVisibility, setPasswordVisibility] = useState({
     password: false,
     confirmPassword: false,
   });
+
+  // Clear form state when toggling between login and registration
+  const toggleForm = () => {
+    setIsLogin((prev) => !prev);
+    setFormData(initialFormData); // Reset form data
+    setErrors({}); // Clear errors
+    setPasswordStrength(0); // Reset password strength
+  };
 
   // Handle input changes
   const handleInputChange = useCallback(({ target: { name, value } }) => {
@@ -302,7 +311,7 @@ const Modal = ({ isOpen, onClose }) => {
                   password: !prev.password,
                 }))
               }
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              className="absolute right-3 top-1/3 transform -translate-y-1/2 text-gray-400"
             >
               {passwordVisibility.password ? <MdVisibilityOff /> : <MdVisibility />}
             </button>
@@ -364,7 +373,7 @@ const Modal = ({ isOpen, onClose }) => {
           <p>
             {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
             <span
-              onClick={() => setIsLogin((prev) => !prev)}
+              onClick={toggleForm}
               className="text-blue-600 cursor-pointer"
             >
               {isLogin ? "Sign up" : "Login"}
