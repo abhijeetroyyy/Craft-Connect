@@ -1,16 +1,15 @@
 'use client';
-import React, { useState, useCallback, useMemo, useEffect } from "react";  // Correct import
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/ThemeToggle";
 import { usePathname } from 'next/navigation';
 import Modal from "./Modal";
-import { auth } from "./firebase-config";  // Import Firebase config
+import { auth } from "./firebase-config";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import { ToastContainer, toast } from 'react-toastify';  // Import ToastContainer and toast
-import 'react-toastify/dist/ReactToastify.css'; // Ensure you import the necessary styles for the toast notifications
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-// NavLink Component (Reusable and Memoized)
 const NavLink = React.memo(({ href, children, active, onClick }) => (
   <Link href={href} onClick={onClick}>
     <span
@@ -27,8 +26,8 @@ NavLink.displayName = "NavLink";
 
 export default function Navbar() {
   const [menuState, setMenuState] = useState({ isMobileMenuOpen: false, isModalOpen: false });
-  const [user, setUser] = useState(null);  // State to hold user information
-  const pathname = usePathname(); // To track current route
+  const [user, setUser] = useState(null);
+  const pathname = usePathname();
 
   const navLinks = useMemo(() => [
     { href: '/', label: 'Home' },
@@ -40,31 +39,30 @@ export default function Navbar() {
   const handleMenuToggle = useCallback(() => {
     setMenuState((prevState) => ({
       ...prevState,
-      isMobileMenuOpen: !prevState.isMobileMenuOpen, // Toggle the mobile menu state directly
+      isMobileMenuOpen: !prevState.isMobileMenuOpen,
     }));
   }, []);
 
   const handleModalToggle = useCallback(() => {
     setMenuState((prevState) => ({
       ...prevState,
-      isModalOpen: !prevState.isModalOpen, // Toggle the modal state directly
+      isModalOpen: !prevState.isModalOpen,
     }));
   }, []);
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      toast.success("Logged out successfully!");  // Use toast instead of alert
-      setUser(null);  // Clear user state on logout
+      toast.success("Logged out successfully!");
+      setUser(null);
     } catch (error) {
-      toast.error("Error logging out: " + error.message);  // Display error message with toast
+      toast.error("Error logging out: " + error.message);
     }
   };
 
-  // Monitor authentication state
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);  // Set the user if logged in
+      setUser(currentUser);
     });
 
     return () => unsubscribe();
@@ -74,12 +72,9 @@ export default function Navbar() {
     <>
       <nav className="bg-white dark:bg-[#212121] shadow-md sticky top-0 z-50 transition-all ease-in-out duration-300">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-          {/* Logo */}
           <div className="text-xl font-bold text-black dark:text-white">
             <Link href="/">Craft Connect</Link>
           </div>
-
-          {/* Desktop Menu */}
           <div className="hidden md:flex space-x-8 items-center">
             {navLinks.map(({ href, label }) => (
               <NavLink
@@ -110,13 +105,9 @@ export default function Navbar() {
               </Button>
             )}
           </div>
-
-          {/* Theme Toggle for Mobile */}
           <div>
             <ThemeToggle />
           </div>
-
-          {/* Mobile Menu Button */}
           <button
             className="md:hidden focus:outline-none"
             onClick={handleMenuToggle}
@@ -140,8 +131,6 @@ export default function Navbar() {
           </button>
         </div>
       </nav>
-
-      {/* Mobile Menu */}
       {menuState.isMobileMenuOpen && (
         <div className="md:hidden bg-white dark:bg-[#212121] bg-opacity-95 fixed inset-0 z-40 flex justify-center items-center transition-all ease-in-out duration-300">
           <div className="flex flex-col space-y-6 py-6 px-6 bg-white dark:bg-[#212121] shadow-lg rounded-lg w-4/5 max-w-md">
@@ -177,11 +166,7 @@ export default function Navbar() {
           </div>
         </div>
       )}
-
-      {/* Modal for Login/Register */}
       <Modal isOpen={menuState.isModalOpen} onClose={handleModalToggle} />
-
-      {/* Toast Container to display toasts */}
       <ToastContainer />
     </>
   );

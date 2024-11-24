@@ -29,6 +29,7 @@ const errorMessages = new Map([
   ["auth/user-not-found", "No user found with this email."],
   ["auth/wrong-password", "Incorrect password."],
   ["auth/weak-password", "Password is too weak."],
+  ["auth/network-request-failed", "Network error. Please try again later."],
 ]);
 
 const Modal = ({ isOpen, onClose }) => {
@@ -75,6 +76,9 @@ const Modal = ({ isOpen, onClose }) => {
       formData;
 
     if (!email) newErrors.email = "Email is required.";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = "Invalid email format.";
+    }
     if (!password) {
       newErrors.password = "Password is required.";
     } else if (!validatePassword(password)) {
@@ -147,10 +151,10 @@ const Modal = ({ isOpen, onClose }) => {
         toast.success("Account created successfully!");
       }
       // Reset form data and state after successful submission
-    setFormData(initialFormData);
-    setErrors({});
-    setPasswordStrength(0);
-    
+      setFormData(initialFormData);
+      setErrors({});
+      setPasswordStrength(0);
+
       onClose(); // Close modal upon success
     } catch (error) {
       console.error("Authentication error:", error);
@@ -192,13 +196,21 @@ const Modal = ({ isOpen, onClose }) => {
       console.error("Google login error:", error);
 
       // Handle unexpected errors
-      toast.error(error.message || "An unexpected error occurred.");
+      const errorMessage =
+        errorMessages.get(error.code) || "An unexpected error occurred.";
+      toast.error(errorMessage);
     }
   };
 
   // Render password strength indicator
   const renderPasswordStrength = () => {
-    const strengthLabels = ["Very Weak", "Weak", "Medium", "Strong", "Very Strong"];
+    const strengthLabels = [
+      "Very Weak",
+      "Weak",
+      "Medium",
+      "Strong",
+      "Very Strong",
+    ];
     const strengthColors = [
       "bg-red-500",
       "bg-orange-500",
@@ -242,8 +254,7 @@ const Modal = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-      <div className="relative bg-white dark:bg-[#1E1E2C] rounded-xl shadow-2xl max-w-md w-full p-8">
-        {/* Close Button */}
+      <div className="relative bg-white dark:bg-[#1E1E2C] rounded-xl shadow-2xl w-full max-w-md lg:max-w-lg p-8 overflow-y-auto max-h-[90%] hide-scrollbar">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition duration-200"
@@ -251,7 +262,6 @@ const Modal = ({ isOpen, onClose }) => {
           <AiOutlineClose size={24} />
         </button>
 
-        {/* Modal Title */}
         <h2 className="text-3xl font-extrabold text-center text-gray-800 dark:text-white mb-3">
           {isLogin ? "Welcome Back!" : "Create Your Account"}
         </h2>
@@ -261,146 +271,79 @@ const Modal = ({ isOpen, onClose }) => {
             : "Fill in the details below to create your account."}
         </p>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           {!isLogin && (
             <>
-              {/* Full Name Field */}
-              <div className="relative">
-                <FiUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  placeholder="Full Name"
-                  className="w-full pl-12 py-3 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-[#262637] dark:text-white dark:placeholder-gray-500"
-                />
-                {errors.name && (
-                  <p className="text-red-500 text-sm mt-1">{errors.name}</p>
-                )}
-              </div>
-
-              {/* Username Field */}
-              <div className="relative">
-                <FiUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
-                <input
-                  type="text"
-                  name="username"
-                  value={formData.username}
-                  onChange={handleInputChange}
-                  placeholder="Username"
-                  className="w-full pl-12 py-3 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-[#262637] dark:text-white dark:placeholder-gray-500"
-                />
-                {errors.username && (
-                  <p className="text-red-500 text-sm mt-1">{errors.username}</p>
-                )}
-              </div>
+              <InputField
+                Icon={FiUser}
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                placeholder="Full Name"
+                error={errors.name}
+              />
+              <InputField
+                Icon={FiUser}
+                name="username"
+                value={formData.username}
+                onChange={handleInputChange}
+                placeholder="Username"
+                error={errors.username}
+              />
             </>
           )}
 
-          {/* Email Field */}
-          <div className="relative">
-            <FiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              placeholder="Email Address"
-              className="w-full pl-12 py-3 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-[#262637] dark:text-white dark:placeholder-gray-500"
-            />
-            {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-            )}
-          </div>
+          <InputField
+            Icon={FiMail}
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={handleInputChange}
+            placeholder="Email Address"
+            error={errors.email}
+          />
 
-          {/* Password Field */}
-          <div className="relative">
-            <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
-            <input
-              type={passwordVisibility.password ? "text" : "password"}
-              name="password"
-              value={formData.password}
-              onChange={handleInputChange}
-              placeholder="Password"
-              className="w-full pl-12 pr-12 py-3 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-[#262637] dark:text-white dark:placeholder-gray-500"
-            />
-            <button
-              type="button"
-              onClick={() =>
-                setPasswordVisibility((prev) => ({
-                  ...prev,
-                  password: !prev.password,
-                }))
-              }
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-400"
-            >
-              {passwordVisibility.password ? (
-                <MdVisibilityOff size={20} />
-              ) : (
-                <MdVisibility size={20} />
-              )}
-            </button>
-            {errors.password && (
-              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-            )}
-            {!isLogin && renderPasswordStrength()}
-          </div>
+          <PasswordField
+            name="password"
+            value={formData.password}
+            onChange={handleInputChange}
+            placeholder="Password"
+            visibility={passwordVisibility.password}
+            onToggleVisibility={() =>
+              setPasswordVisibility((prev) => ({
+                ...prev,
+                password: !prev.password,
+              }))
+            }
+            error={errors.password}
+          />
+
+          {!isLogin && renderPasswordStrength()}
 
           {!isLogin && (
             <>
-              {/* Confirm Password Field */}
-              <div className="relative">
-                <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
-                <input
-                  type={passwordVisibility.confirmPassword ? "text" : "password"}
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                  placeholder="Confirm Password"
-                  className="w-full pl-12 pr-12 py-3 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-[#262637] dark:text-white dark:placeholder-gray-500"
-                />
-                <button
-                  type="button"
-                  onClick={() =>
-                    setPasswordVisibility((prev) => ({
-                      ...prev,
-                      confirmPassword: !prev.confirmPassword,
-                    }))
-                  }
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-400"
-                >
-                  {passwordVisibility.confirmPassword ? (
-                    <MdVisibilityOff size={20} />
-                  ) : (
-                    <MdVisibility size={20} />
-                  )}
-                </button>
-                {errors.confirmPassword && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.confirmPassword}
-                  </p>
-                )}
-              </div>
-
-              {/* Phone Field */}
-              <div className="relative">
-                <AiFillPhone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
-                <input
-                  type="text"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  placeholder="Phone Number"
-                  className="w-full pl-12 py-3 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-[#262637] dark:text-white dark:placeholder-gray-500"
-                />
-                {errors.phone && (
-                  <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
-                )}
-              </div>
-
-              {/* Role Field */}
+              <PasswordField
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                placeholder="Confirm Password"
+                visibility={passwordVisibility.confirmPassword}
+                onToggleVisibility={() =>
+                  setPasswordVisibility((prev) => ({
+                    ...prev,
+                    confirmPassword: !prev.confirmPassword,
+                  }))
+                }
+                error={errors.confirmPassword}
+              />
+              <InputField
+                Icon={AiFillPhone}
+                name="phone"
+                value={formData.phone}
+                onChange={handleInputChange}
+                placeholder="Phone Number"
+                error={errors.phone}
+              />
               <div className="relative">
                 <select
                   name="role"
@@ -409,8 +352,8 @@ const Modal = ({ isOpen, onClose }) => {
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-[#262637] dark:text-white"
                 >
                   <option value="">Select Role</option>
-                  <option value="Admin">Admin</option>
-                  <option value="User">User</option>
+                  <option value="Seller">Seller</option>
+                  <option value="Buyer">Buyer</option>
                 </select>
                 {errors.role && (
                   <p className="text-red-500 text-sm mt-1">{errors.role}</p>
@@ -419,7 +362,6 @@ const Modal = ({ isOpen, onClose }) => {
             </>
           )}
 
-          {/* Submit Button */}
           <button
             type="submit"
             className="w-full py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium rounded-lg shadow-lg hover:from-blue-600 hover:to-blue-700 focus:ring-2 focus:ring-blue-300 transition duration-200"
@@ -428,7 +370,6 @@ const Modal = ({ isOpen, onClose }) => {
           </button>
         </form>
 
-        {/* Toggle Form */}
         <div className="mt-6 text-center">
           <p className="text-gray-600 dark:text-gray-400">
             {isLogin ? "Don't have an account?" : "Already have an account?"}
@@ -442,7 +383,6 @@ const Modal = ({ isOpen, onClose }) => {
           </p>
         </div>
 
-        {/* Google Login */}
         <div className="mt-6 text-center">
           <p className="text-gray-600 dark:text-gray-400">Or continue with:</p>
           <button
@@ -458,5 +398,52 @@ const Modal = ({ isOpen, onClose }) => {
     </div>
   );
 };
+
+// Reusable InputField Component
+const InputField = ({ Icon, name, type = "text", value, onChange, placeholder, error }) => (
+  <div className="relative">
+    <Icon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
+    <input
+      type={type}
+      name={name}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      className="w-full pl-12 py-3 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-[#262637] dark:text-white dark:placeholder-gray-500"
+    />
+    {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+  </div>
+);
+
+// Reusable PasswordField Component
+const PasswordField = ({
+  name,
+  value,
+  onChange,
+  placeholder,
+  visibility,
+  onToggleVisibility,
+  error,
+}) => (
+  <div className="relative">
+    <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
+    <input
+      type={visibility ? "text" : "password"}
+      name={name}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      className="w-full pl-12 pr-12 py-3 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-[#262637] dark:text-white dark:placeholder-gray-500"
+    />
+    <button
+      type="button"
+      onClick={onToggleVisibility}
+      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-400"
+    >
+      {visibility ? <MdVisibilityOff size={20} /> : <MdVisibility size={20} />}
+    </button>
+    {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+  </div>
+);
 
 export default Modal;

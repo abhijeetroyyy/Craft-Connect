@@ -5,8 +5,6 @@ import HeroSection from "@/components/HeroSection";
 import FeaturedProducts from "./products/FeaturedProducts";
 import ArtisanHighlight from "@/components/ArtisanHighlight";
 import { Suspense } from 'react';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css'; // Ensure you import the necessary styles for the toast notifications
 
 // Lazy loading wrapper component
 const LazyLoadWrapper = ({ children }) => (
@@ -39,8 +37,6 @@ export default function HomePage() {
       {/* Footer */}
       <Footer />
 
-      {/* Toast Container for Toast Notifications */}
-      <ToastContainer />
     </div>
   );
 }

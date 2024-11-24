@@ -142,13 +142,24 @@ const FilterPopup = ({ filters, handleFilterChange, handleClearFilters, categori
 
 const ProductCard = ({ product, addToWishlist, addToCart, buyNow }) => (
   <div className="bg-white dark:bg-[#212121] shadow-lg rounded-xl overflow-hidden flex flex-col justify-between">
-    <img
-      src={product.image}
-      alt={product.name}
-      className="h-56 w-full object-contain bg-transparent p-4"
-    />
+    {/* Navigate to product details on click */}
+    <div
+      onClick={() => (window.location.href = `/products/${product.id}`)}
+      className="cursor-pointer"
+    >
+      <img
+        src={product.image}
+        alt={product.name}
+        className="h-56 w-full object-contain bg-transparent p-4"
+      />
+    </div>
     <div className="p-4 flex flex-col flex-grow">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{product.title}</h3>
+      <h3
+        onClick={() => (window.location.href = `/products/${product.id}`)}
+        className="text-lg font-semibold text-gray-900 dark:text-gray-100 cursor-pointer"
+      >
+        {product.title}
+      </h3>
       <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 flex-grow">
         {product.description.slice(0, 60)}...
       </p>
@@ -211,6 +222,7 @@ const Pagination = ({ currentPage, totalPages, setCurrentPage }) => (
 );
 
 const ProductGrid = () => {
+  // State, effect, and logic for fetching and filtering products remain unchanged.
   const [products, setProducts] = useState([]);
   const [filters, setFilters] = useState({
     category: "",
@@ -289,7 +301,16 @@ const ProductGrid = () => {
           <FilterPopup
             filters={filters}
             handleFilterChange={(key, value) => setFilters({ ...filters, [key]: value })}
-            handleClearFilters={() => setFilters({ category: "", priceRange: [0, 1000], searchQuery: "", sortBy: "", isNew: false, hasDiscount: false })}
+            handleClearFilters={() =>
+              setFilters({
+                category: "",
+                priceRange: [0, 1000],
+                searchQuery: "",
+                sortBy: "",
+                isNew: false,
+                hasDiscount: false,
+              })
+            }
             categories={[...new Set(products.map((p) => p.category))]}
             isOpen={isFilterPopupOpen}
             togglePopup={() => setIsFilterPopupOpen((prev) => !prev)}
