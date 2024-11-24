@@ -91,6 +91,11 @@ const FeaturedProducts = () => {
           customTransition="transform 0.5s ease-in-out"
           transitionDuration={500}
           containerClass="carousel-container"
+          itemClass="carousel-item-padding-40-px"
+          arrows
+          renderButtonGroupOutside
+          customLeftArrow={<CustomLeftArrow />}
+          customRightArrow={<CustomRightArrow />}
         >
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />
@@ -135,6 +140,30 @@ const ProductCard = ({ product }) => {
         View Product
       </button>
     </div>
+  );
+};
+
+const CustomLeftArrow = ({ onClick }) => {
+  return (
+    <button
+      onClick={onClick}
+      className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full shadow-lg hover:bg-gray-700 focus:outline-none"
+      aria-label="Previous slide"
+    >
+      &lt;
+    </button>
+  );
+};
+
+const CustomRightArrow = ({ onClick }) => {
+  return (
+    <button
+      onClick={onClick}
+      className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full shadow-lg hover:bg-gray-700 focus:outline-none"
+      aria-label="Next slide"
+    >
+      &gt;
+    </button>
   );
 };
 

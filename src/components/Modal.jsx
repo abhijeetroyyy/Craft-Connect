@@ -1,5 +1,4 @@
 import { useState, useCallback } from "react";
-import { Button } from "@/components/ui/button";
 import { auth, db } from "./firebase-config";
 import {
   signInWithEmailAndPassword,
@@ -18,9 +17,19 @@ import "react-toastify/dist/ReactToastify.css";
 
 // Password validation function
 const validatePassword = (password) => {
-  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/;
+  const passwordRegex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/;
   return passwordRegex.test(password);
 };
+
+// Error Messages Map
+const errorMessages = new Map([
+  ["auth/email-already-in-use", "Email is already registered."],
+  ["auth/invalid-email", "Invalid email format."],
+  ["auth/user-not-found", "No user found with this email."],
+  ["auth/wrong-password", "Incorrect password."],
+  ["auth/weak-password", "Password is too weak."],
+]);
 
 const Modal = ({ isOpen, onClose }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -41,129 +50,136 @@ const Modal = ({ isOpen, onClose }) => {
     confirmPassword: false,
   });
 
-  // Clear form state when toggling between login and registration
-  const toggleForm = () => {
+  // Toggle between Login and Sign Up forms
+  const toggleForm = useCallback(() => {
     setIsLogin((prev) => !prev);
     setFormData(initialFormData); // Reset form data
     setErrors({}); // Clear errors
     setPasswordStrength(0); // Reset password strength
-  };
+  }, [initialFormData]);
 
   // Handle input changes
   const handleInputChange = useCallback(({ target: { name, value } }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
 
     if (name === "password") {
-      const strength = zxcvbn(value).score; // Calculate password strength
-      setPasswordStrength(strength);
+      // Calculate password strength only when the password changes
+      setPasswordStrength(zxcvbn(value).score);
     }
   }, []);
 
-  // Validate fields
+  // Validate all fields before submission
   const validateFields = useCallback(() => {
     const newErrors = {};
-    if (!formData.email) newErrors.email = "Email is required.";
-    if (!formData.password) {
+    const { email, password, confirmPassword, name, username, phone, role } =
+      formData;
+
+    if (!email) newErrors.email = "Email is required.";
+    if (!password) {
       newErrors.password = "Password is required.";
-    } else if (!validatePassword(formData.password)) {
+    } else if (!validatePassword(password)) {
       newErrors.password =
         "Password must be at least 12 characters long and include uppercase, lowercase, number, and special character.";
     }
-    if (!isLogin && formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match.";
+    if (!isLogin) {
+      if (password !== confirmPassword)
+        newErrors.confirmPassword = "Passwords do not match.";
+      if (!name) newErrors.name = "Full name is required.";
+      if (!username) newErrors.username = "Username is required.";
+      if (!phone) newErrors.phone = "Phone number is required.";
+      if (!role) newErrors.role = "Role is required.";
     }
-    if (!isLogin && !formData.name) newErrors.name = "Full name is required.";
-    if (!isLogin && !formData.username)
-      newErrors.username = "Username is required.";
-    if (!isLogin && !formData.role) newErrors.role = "Role is required.";
-    if (!isLogin && !formData.phone)
-      newErrors.phone = "Phone number is required.";
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }, [formData, isLogin]);
 
   // Handle form submission
-  const handleSubmit = useCallback(
-    async (e) => {
-      e.preventDefault();
-      if (!validateFields()) return;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateFields()) return;
 
-      try {
-        let user;
-        if (isLogin) {
-          // Login flow
-          const userCredential = await signInWithEmailAndPassword(
-            auth,
-            formData.email,
-            formData.password
-          );
-          user = userCredential.user;
-          toast.success("Welcome back!");
-        } else {
-          // Registration flow
-          const userCredential = await createUserWithEmailAndPassword(
-            auth,
-            formData.email,
-            formData.password
-          );
-          user = userCredential.user;
-
-          // Update profile with username
-          await updateProfile(user, {
-            displayName: formData.username,
-          });
-
-          // Save user details in Firestore
-          const userData = {
-            name: formData.name,
-            email: formData.email,
-            username: formData.username,
-            phone: formData.phone,
-            role: formData.role,
-            loginMethod: "email",
-            createdAt: new Date(),
-            lastLogin: new Date(),
-          };
-
-          await setDoc(doc(db, "users", user.uid), userData);
-          toast.success("Account created successfully!");
-        }
-
-        onClose(); // Close modal upon success
-      } catch (error) {
-        console.error("Authentication error:", error);
-        if (error.code === "auth/email-already-in-use") {
-          toast.error("Email is already registered.");
-        } else if (error.code === "auth/invalid-email") {
-          toast.error("Invalid email format.");
-        } else if (error.code === "auth/weak-password") {
-          toast.error("Password is too weak.");
-        } else {
-          toast.error(error.message);
-        }
-      }
-    },
-    [isLogin, formData, validateFields, onClose]
-  );
-
-  // Handle Google login
-  const handleSocialLogin = useCallback(async () => {
-    const provider = new GoogleAuthProvider();
     try {
+      let user;
+      if (isLogin) {
+        // Login flow
+        const userCredential = await signInWithEmailAndPassword(
+          auth,
+          formData.email,
+          formData.password
+        );
+        user = userCredential.user;
+
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (!userDoc.exists()) {
+          throw new Error(
+            "User data not found in the database. Please contact support."
+          );
+        }
+
+        toast.success(`Welcome back, ${userDoc.data().username || "User"}!`);
+      } else {
+        // Registration flow
+        const userCredential = await createUserWithEmailAndPassword(
+          auth,
+          formData.email,
+          formData.password
+        );
+        user = userCredential.user;
+
+        await updateProfile(user, {
+          displayName: formData.username,
+        });
+
+        const userData = {
+          name: formData.name,
+          email: formData.email,
+          username: formData.username,
+          phone: formData.phone,
+          role: formData.role,
+          loginMethod: "email",
+          createdAt: new Date().toISOString(),
+          lastLogin: new Date().toISOString(),
+        };
+
+        await setDoc(doc(db, "users", user.uid), userData);
+
+        toast.success("Account created successfully!");
+      }
+      // Reset form data and state after successful submission
+    setFormData(initialFormData);
+    setErrors({});
+    setPasswordStrength(0);
+    
+      onClose(); // Close modal upon success
+    } catch (error) {
+      console.error("Authentication error:", error);
+
+      // Use error message map for known Firebase errors
+      const errorMessage =
+        errorMessages.get(error.code) || "An unexpected error occurred.";
+      toast.error(errorMessage);
+    }
+  };
+
+  // Handle social login with Google
+  const handleSocialLogin = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      // Check if user already exists in Firestore
       const userDoc = await getDoc(doc(db, "users", user.uid));
       if (!userDoc.exists()) {
         const userData = {
           name: user.displayName || "",
           email: user.email,
-          username: "", // Prompt user to set a username
+          username: "",
           phone: user.phoneNumber || "",
+          role: "",
           loginMethod: "google",
-          createdAt: new Date(),
-          lastLogin: new Date(),
+          createdAt: new Date().toISOString(),
+          lastLogin: new Date().toISOString(),
         };
 
         await setDoc(doc(db, "users", user.uid), userData);
@@ -171,14 +187,16 @@ const Modal = ({ isOpen, onClose }) => {
       }
 
       toast.success(`Welcome, ${user.displayName || "User"}!`);
-      onClose(); // Close modal upon success
+      onClose();
     } catch (error) {
       console.error("Google login error:", error);
-      toast.error(error.message);
-    }
-  }, [onClose]);
 
-  // Render password strength meter
+      // Handle unexpected errors
+      toast.error(error.message || "An unexpected error occurred.");
+    }
+  };
+
+  // Render password strength indicator
   const renderPasswordStrength = () => {
     const strengthLabels = ["Very Weak", "Weak", "Medium", "Strong", "Very Strong"];
     const strengthColors = [
@@ -220,88 +238,93 @@ const Modal = ({ isOpen, onClose }) => {
     );
   };
 
-  // JSX rendering
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="relative bg-white dark:bg-[#212121] rounded-lg shadow-2xl max-w-md w-full p-8">
-        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+      <div className="relative bg-white dark:bg-[#1E1E2C] rounded-xl shadow-2xl max-w-md w-full p-8">
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition duration-200"
+        >
           <AiOutlineClose size={24} />
         </button>
-        <h2 className="text-3xl font-extrabold text-center text-gray-800 dark:text-white mb-2">
-          {isLogin ? "Welcome Back!" : "Create an Account"}
+
+        {/* Modal Title */}
+        <h2 className="text-3xl font-extrabold text-center text-gray-800 dark:text-white mb-3">
+          {isLogin ? "Welcome Back!" : "Create Your Account"}
         </h2>
-        <p className="text-center text-gray-500 dark:text-gray-300 mb-6">
+        <p className="text-center text-gray-600 dark:text-gray-400 mb-6">
           {isLogin
-            ? "Login to access your account"
-            : "Fill in the details to get started"}
+            ? "Log in to continue."
+            : "Fill in the details below to create your account."}
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-6">
           {!isLogin && (
-            <div className="relative">
-              <FiUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                placeholder="Full Name"
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-300 focus:outline-none dark:bg-[#2A2A2A] dark:text-white dark:placeholder-gray-400"
-              />
-            </div>
+            <>
+              {/* Full Name Field */}
+              <div className="relative">
+                <FiUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  placeholder="Full Name"
+                  className="w-full pl-12 py-3 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-[#262637] dark:text-white dark:placeholder-gray-500"
+                />
+                {errors.name && (
+                  <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+                )}
+              </div>
+
+              {/* Username Field */}
+              <div className="relative">
+                <FiUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
+                <input
+                  type="text"
+                  name="username"
+                  value={formData.username}
+                  onChange={handleInputChange}
+                  placeholder="Username"
+                  className="w-full pl-12 py-3 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-[#262637] dark:text-white dark:placeholder-gray-500"
+                />
+                {errors.username && (
+                  <p className="text-red-500 text-sm mt-1">{errors.username}</p>
+                )}
+              </div>
+            </>
           )}
 
-          {!isLogin && (
-            <div className="relative">
-              <FiUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                name="username"
-                value={formData.username}
-                onChange={handleInputChange}
-                placeholder="Username"
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-300 focus:outline-none dark:bg-[#2A2A2A] dark:text-white dark:placeholder-gray-400"
-              />
-            </div>
-          )}
-
+          {/* Email Field */}
           <div className="relative">
-            <FiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <FiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleInputChange}
-              placeholder="Email"
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-300 focus:outline-none dark:bg-[#2A2A2A] dark:text-white dark:placeholder-gray-400"
+              placeholder="Email Address"
+              className="w-full pl-12 py-3 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-[#262637] dark:text-white dark:placeholder-gray-500"
             />
+            {errors.email && (
+              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+            )}
           </div>
 
-          {!isLogin && (
-            <div className="relative">
-              <AiFillPhone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleInputChange}
-                placeholder="Phone Number"
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-300 focus:outline-none dark:bg-[#2A2A2A] dark:text-white dark:placeholder-gray-400"
-              />
-            </div>
-          )}
-
+          {/* Password Field */}
           <div className="relative">
-            <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
             <input
               type={passwordVisibility.password ? "text" : "password"}
               name="password"
               value={formData.password}
               onChange={handleInputChange}
               placeholder="Password"
-              className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-300 focus:outline-none dark:bg-[#2A2A2A] dark:text-white dark:placeholder-gray-400"
+              className="w-full pl-12 pr-12 py-3 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-[#262637] dark:text-white dark:placeholder-gray-500"
             />
             <button
               type="button"
@@ -311,74 +334,125 @@ const Modal = ({ isOpen, onClose }) => {
                   password: !prev.password,
                 }))
               }
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-400"
             >
-              {passwordVisibility.password ? <MdVisibilityOff /> : <MdVisibility />}
+              {passwordVisibility.password ? (
+                <MdVisibilityOff size={20} />
+              ) : (
+                <MdVisibility size={20} />
+              )}
             </button>
-            {renderPasswordStrength()}
+            {errors.password && (
+              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+            )}
+            {!isLogin && renderPasswordStrength()}
           </div>
 
           {!isLogin && (
-            <div className="relative">
-              <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input
-                type={passwordVisibility.confirmPassword ? "text" : "password"}
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                placeholder="Confirm Password"
-                className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-300 focus:outline-none dark:bg-[#2A2A2A] dark:text-white dark:placeholder-gray-400"
-              />
-              <button
-                type="button"
-                onClick={() =>
-                  setPasswordVisibility((prev) => ({
-                    ...prev,
-                    confirmPassword: !prev.confirmPassword,
-                  }))
-                }
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-              >
-                {passwordVisibility.confirmPassword ? (
-                  <MdVisibilityOff />
-                ) : (
-                  <MdVisibility />
+            <>
+              {/* Confirm Password Field */}
+              <div className="relative">
+                <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
+                <input
+                  type={passwordVisibility.confirmPassword ? "text" : "password"}
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleInputChange}
+                  placeholder="Confirm Password"
+                  className="w-full pl-12 pr-12 py-3 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-[#262637] dark:text-white dark:placeholder-gray-500"
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setPasswordVisibility((prev) => ({
+                      ...prev,
+                      confirmPassword: !prev.confirmPassword,
+                    }))
+                  }
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-400"
+                >
+                  {passwordVisibility.confirmPassword ? (
+                    <MdVisibilityOff size={20} />
+                  ) : (
+                    <MdVisibility size={20} />
+                  )}
+                </button>
+                {errors.confirmPassword && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.confirmPassword}
+                  </p>
                 )}
-              </button>
-            </div>
+              </div>
+
+              {/* Phone Field */}
+              <div className="relative">
+                <AiFillPhone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
+                <input
+                  type="text"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  placeholder="Phone Number"
+                  className="w-full pl-12 py-3 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-[#262637] dark:text-white dark:placeholder-gray-500"
+                />
+                {errors.phone && (
+                  <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
+                )}
+              </div>
+
+              {/* Role Field */}
+              <div className="relative">
+                <select
+                  name="role"
+                  value={formData.role}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-[#262637] dark:text-white"
+                >
+                  <option value="">Select Role</option>
+                  <option value="Admin">Admin</option>
+                  <option value="User">User</option>
+                </select>
+                {errors.role && (
+                  <p className="text-red-500 text-sm mt-1">{errors.role}</p>
+                )}
+              </div>
+            </>
           )}
 
-          <div className="text-center">
-            <Button
-              type="submit"
-              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700"
-            >
-              {isLogin ? "Login" : "Sign Up"}
-            </Button>
-          </div>
+          {/* Submit Button */}
+          <button
+            type="submit"
+            className="w-full py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium rounded-lg shadow-lg hover:from-blue-600 hover:to-blue-700 focus:ring-2 focus:ring-blue-300 transition duration-200"
+          >
+            {isLogin ? "Login" : "Sign Up"}
+          </button>
         </form>
 
+        {/* Toggle Form */}
         <div className="mt-6 text-center">
-          <Button
-            type="button"
-            className="w-full bg-red-600 text-white py-3 px-4 rounded-lg flex justify-center items-center gap-3 hover:bg-red-700"
-            onClick={handleSocialLogin}
-          >
-            <AiOutlineGoogle size={20} />
-            Sign in with Google
-          </Button>
+          <p className="text-gray-600 dark:text-gray-400">
+            {isLogin ? "Don't have an account?" : "Already have an account?"}
+            <button
+              type="button"
+              onClick={toggleForm}
+              className="ml-2 text-blue-500 hover:underline dark:text-blue-400"
+            >
+              {isLogin ? "Sign Up" : "Login"}
+            </button>
+          </p>
         </div>
 
-        <div className="mt-4 text-center">
-          <p>
-            {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
-            <span
-              onClick={toggleForm}
-              className="text-blue-600 cursor-pointer"
-            >
-              {isLogin ? "Sign up" : "Login"}
-            </span>
-          </p>
+        {/* Google Login */}
+        <div className="mt-6 text-center">
+          <p className="text-gray-600 dark:text-gray-400">Or continue with:</p>
+          <button
+            type="button"
+            onClick={handleSocialLogin}
+            className="mt-4 flex items-center justify-center w-full py-3 bg-red-600 text-white font-medium rounded-lg shadow-lg hover:bg-red-700 focus:ring-2 focus:ring-red-300 transition duration-200"
+          >
+            <AiOutlineGoogle size={24} />
+            <span className="ml-2">Google</span>
+          </button>
         </div>
       </div>
     </div>

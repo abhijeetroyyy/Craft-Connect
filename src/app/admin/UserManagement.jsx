@@ -8,7 +8,7 @@ const UserManagement = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const usersSnapshot = await getDocs(collection(db, 'sellers'));
+        const usersSnapshot = await getDocs(collection(db, 'users'));
         const usersList = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setUsers(usersList);
       } catch (error) {

@@ -7,6 +7,8 @@ import { usePathname } from 'next/navigation';
 import Modal from "./Modal";
 import { auth } from "./firebase-config";  // Import Firebase config
 import { onAuthStateChanged, signOut } from "firebase/auth";
+import { ToastContainer, toast } from 'react-toastify';  // Import ToastContainer and toast
+import 'react-toastify/dist/ReactToastify.css'; // Ensure you import the necessary styles for the toast notifications
 
 // NavLink Component (Reusable and Memoized)
 const NavLink = React.memo(({ href, children, active, onClick }) => (
@@ -52,10 +54,10 @@ export default function Navbar() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      alert("Logged out successfully!");
+      toast.success("Logged out successfully!");  // Use toast instead of alert
       setUser(null);  // Clear user state on logout
     } catch (error) {
-      alert("Error logging out: " + error.message);
+      toast.error("Error logging out: " + error.message);  // Display error message with toast
     }
   };
 
@@ -178,6 +180,9 @@ export default function Navbar() {
 
       {/* Modal for Login/Register */}
       <Modal isOpen={menuState.isModalOpen} onClose={handleModalToggle} />
+
+      {/* Toast Container to display toasts */}
+      <ToastContainer />
     </>
   );
 }
