@@ -6,6 +6,7 @@ import Image from "next/image";
 import { AiFillStar, AiOutlineStar } from "react-icons/ai";
 import { BsTruck, BsShieldCheck } from "react-icons/bs";
 import { FaFacebook, FaTwitter, FaWhatsapp } from "react-icons/fa";
+import Link from "next/link";
 
 const ProductOverview = () => {
   const { id } = useParams();
@@ -44,20 +45,20 @@ const ProductOverview = () => {
         {/* Breadcrumb Navigation */}
         <div className="text-sm text-gray-500 dark:text-gray-400 mb-4">
           <span>
-            <a href="/" className="hover:text-blue-600 transition duration-300">
+            <Link href="/" className="hover:text-blue-600 transition duration-300">
               Home
-            </a>{" "}
+            </Link>{" "}
             &gt;{" "}
-            <a href="/products" className="hover:text-blue-600 transition duration-300">
+            <Link href="/products" className="hover:text-blue-600 transition duration-300">
               Products
-            </a>{" "}
+            </Link>{" "}
             &gt; <span className="text-gray-800 dark:text-gray-200">{product.title}</span>
           </span>
         </div>
 
         <div className="flex flex-col md:flex-row gap-8">
           {/* Product Image Section */}
-          <div className="w-full md:w-1/3  top-4 flex flex-col items-center">
+          <div className="w-full md:w-1/3 top-4 flex flex-col items-center">
             <div className="border rounded-lg overflow-hidden shadow-lg transform transition-all hover:scale-105 duration-300">
               <Image
                 src={product.image}
@@ -140,13 +141,12 @@ const ProductOverview = () => {
 
             {/* Purchase Options */}
             <div className="flex items-center gap-4 mt-6">
-            <input
-  type="number"
-  min="1"
-  defaultValue="1"
-  className="border rounded-lg w-16 text-center py-2 focus:ring-2 focus:ring-blue-500 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
-/>
-
+              <input
+                type="number"
+                min="1"
+                defaultValue="1"
+                className="border rounded-lg w-16 text-center py-2 focus:ring-2 focus:ring-blue-500 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+              />
               <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 shadow-md transition duration-300">
                 Add to Cart
               </button>

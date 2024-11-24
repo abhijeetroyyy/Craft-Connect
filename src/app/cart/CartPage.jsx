@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Image from "next/image"; // Import Image from next/image
 
 const CartPage = () => {
   const [cart, setCart] = useState([]);
@@ -96,9 +97,11 @@ const CartPage = () => {
                   className="flex flex-col sm:flex-row items-center bg-white dark:bg-gray-800 p-6 shadow-lg rounded-lg border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-xl"
                 >
                   {/* Product Image */}
-                  <img
+                  <Image
                     src={item.image}
                     alt={item.title}
+                    width={100} // Width of the image
+                    height={100} // Height of the image
                     className="w-full sm:w-24 h-24 object-contain rounded-md border border-gray-300 dark:border-gray-700 mb-4 sm:mb-0"
                   />
 
