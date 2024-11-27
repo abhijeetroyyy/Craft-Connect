@@ -142,7 +142,7 @@ export default function Navbar() {
                 )}
               </div>
             )}
-            {/* <ThemeToggle /> */}
+            <ThemeToggle />
           </div>
 
           {/* Mobile Menu Buttons */}
@@ -157,7 +157,7 @@ export default function Navbar() {
               <FaUserCircle
                 className="text-3xl text-gray-700 dark:text-white cursor-pointer"
                 onClick={handleProfileMenuToggle}
-              />
+              />  
             ) : (
               <Button
                 variant="outline"
@@ -168,7 +168,7 @@ export default function Navbar() {
                 Login
               </Button>
             )}
-            {/* <ThemeToggle /> */}
+            <ThemeToggle />
           </div>
         </div>
       </nav>

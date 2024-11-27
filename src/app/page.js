@@ -5,7 +5,7 @@ import HeroSection from "@/components/HeroSection";
 import FeaturedProducts from "./products/FeaturedProducts";
 import ArtisanHighlight from "@/components/ArtisanHighlight";
 import { Suspense } from 'react';
-
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 // Lazy loading wrapper component
 const LazyLoadWrapper = ({ children }) => (
   <Suspense fallback={<div className="text-center py-8">Loading...</div>}>
