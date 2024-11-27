@@ -175,12 +175,12 @@ const ProductCard = ({ product, addToWishlist, addToCart, buyNow }) => (
       >
         <AiOutlineHeart />
       </button>
-      <button
+      {/* <button
         onClick={() => buyNow(product.id)}
         className="p-2 flex justify-center items-center flex-grow rounded-lg bg-green-500 text-white hover:bg-green-600 transition"
       >
         Buy Now
-      </button>
+      </button> */}
       <button
         onClick={() => addToCart(product.id)}
         className="p-2 flex justify-center items-center flex-grow rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-blue-500 text-blue-500 hover:text-white transition"
@@ -329,7 +329,7 @@ const ProductGrid = () => {
                   product={product}
                   addToWishlist={(id) => setWishlist((prev) => [...prev, id])}
                   addToCart={(id) => setCart((prev) => [...prev, id])}
-                  buyNow={buyNow}
+                  // buyNow={buyNow}
                 />
               ))
             )}

@@ -142,7 +142,7 @@ export default function Navbar() {
                 )}
               </div>
             )}
-            <ThemeToggle />
+            {/* <ThemeToggle /> */}
           </div>
 
           {/* Mobile Menu Buttons */}
@@ -168,7 +168,7 @@ export default function Navbar() {
                 Login
               </Button>
             )}
-            <ThemeToggle />
+            {/* <ThemeToggle /> */}
           </div>
         </div>
       </nav>
