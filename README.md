@@ -1,5 +1,7 @@
 CraftConnect 🎨🛠️
 CraftConnect is a dynamic platform revolutionizing the world of handicrafts by connecting artisans and buyers directly. By leveraging blockchain for transparency and AI for personalized user experiences, CraftConnect ensures trust and engagement between creators and consumers.
+![image](https://github.com/user-attachments/assets/b67b76ef-edb1-4b98-9c6c-89b65ccab0bd)
+
 
 Features
 Blockchain Integration: Ensures transparent transactions and provenance tracking of handicrafts.
